@@ -1,23 +1,31 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const AuthContext = createContext({});
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Verificar se existe um token no localStorage
     const token = localStorage.getItem('token');
-    if (token) {
-      // Simular dados do usuário
+    
+    // Se não estamos na página de login e não temos token, redireciona para login
+    if (!token && location.pathname !== '/login') {
+      navigate('/login');
+    } else if (token) {
+      // Se temos token, carrega os dados do usuário
       setUser({
         email: localStorage.getItem('userEmail'),
         name: 'Usuário Demo',
       });
     }
+    
     setLoading(false);
-  }, []);
+  }, [navigate, location.pathname]);
 
   const login = async (email, password) => {
     // Simular uma chamada de API
@@ -29,6 +37,7 @@ export function AuthProvider({ children }) {
         email,
         name: 'Usuário Demo',
       });
+      navigate('/dashboard');
       return true;
     }
     return false;
@@ -38,6 +47,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token');
     localStorage.removeItem('userEmail');
     setUser(null);
+    navigate('/login');
   };
 
   return (

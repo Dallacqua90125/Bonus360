@@ -24,6 +24,8 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <Routes>
+      {/* Redireciona a raiz para o login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       <Route
         path="/*"

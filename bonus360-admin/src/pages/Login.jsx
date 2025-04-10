@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './Login.module.css';
 import timewareLogo from '../assets/Logo-timeware.png';
@@ -9,7 +9,12 @@ const Login = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, user } = useAuth();
+
+    // Se o usuário já estiver autenticado, redireciona para o dashboard
+    if (user) {
+        return <Navigate to="/dashboard" replace />;
+    }
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -28,8 +33,8 @@ const Login = () => {
             }
 
             const success = await login(credentials.email, credentials.password);
-            if (success) navigate('/dashboard');
-            else throw new Error('Credenciais inválidas');
+            if (!success) throw new Error('Credenciais inválidas');
+            // Não é necessário navegar aqui, o login já faz isso
         } catch (err) {
             setError(err.message || 'Falha no login. Por favor, verifique suas credenciais.');
         }

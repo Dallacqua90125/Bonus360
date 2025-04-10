@@ -32,7 +32,7 @@ import {
 } from '@mui/icons-material';
 
 // Importação da logo
-import logoImage from '../assets/Logo-Bonus.png'; // Alterado o nome do arquivo
+import timewareLogo from '../assets/Logo-timeware.png'; // Usando a mesma logo da tela de login
 
 // Importação das páginas
 import Dashboard from '../pages/Dashboard';
@@ -173,17 +173,18 @@ function Layout() {
           >
             <MenuIcon />
           </IconButton>
-          <Box sx={{ flexGrow: 1 }}>
+          <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
             <img
-              src={logoImage}
+              src={timewareLogo}
               alt="Bonus360 Logo"
               style={{
-                height: '30px', // Mantém o tamanho original
-                transform: 'scale(1.5)', // Aumenta visualmente
-                transformOrigin: 'left center', // Alinha à esquerda e centraliza verticalmente
-                verticalAlign: 'middle'
+                height: '30px',
+                marginRight: '10px'
               }}
             />
+            <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
+              Bonus360
+            </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }} onClick={handleProfileClick}>
             <Avatar sx={{ width: 32, height: 32 }}>{user?.name?.charAt(0)?.toUpperCase()}</Avatar>
