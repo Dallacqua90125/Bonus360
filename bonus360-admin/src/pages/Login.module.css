@@ -1,0 +1,243 @@
+/* bonus360Admin/src/pages/Login.module.css */
+
+.container {
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(
+        circle at center,
+        #ffffff 0%,
+        #f0f2f5 30%,
+        rgba(0, 174, 255, 0.2) 70%,
+        rgba(0, 174, 255, 0.3) 100%
+    );
+    padding: 40px;
+}
+
+.illustrationSection {
+    flex: 1;
+    background-color: #00aeff; /* Azul claro da imagem */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    /* Adicionado para efeito 3D e controle de overflow */
+    perspective: 1000px; /* Define a perspectiva para transformações 3D */
+    overflow: hidden; /* Esconde partes da imagem que vazam, se necessário ajustar */
+    position: relative; /* Necessário para posicionar pseudo-elementos */
+}
+
+/* Estilo para a imagem da logo */
+.logoImage {
+    max-width: 80%; /* Ajuste a largura máxima conforme necessário */
+    max-height: 300px; /* Ajuste a altura máxima conforme necessário */
+    height: auto; /* Mantém a proporção */
+    display: block; /* Garante que a imagem seja um bloco para transformações */
+    position: relative; /* Para o pseudo-elemento do brilho */
+    z-index: 1; /* Garante que a imagem fique sobre o brilho base */
+    /* Efeito 3D e "vazamento" */
+    transform: rotateY(15deg) translateX(-15%) scale(1.1); /* Rotação Y, leve deslocamento e escala */
+    box-shadow: -10px 10px 30px rgba(0, 0, 0, 0.3); /* Sombra para profundidade */
+    transition: transform 0.5s ease-out, box-shadow 0.5s ease-out; /* Transição suave */
+}
+
+.logoImage:hover {
+    transform: rotateY(5deg) translateX(-5%) scale(1.15); /* Efeito mais sutil no hover */
+    box-shadow: -5px 5px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Efeito de Brilho */
+.logoImage::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%; /* Começa fora da imagem à esquerda */
+    width: 80%; /* Largura do brilho */
+    height: 100%;
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: skewX(-25deg); /* Inclina o brilho */
+    z-index: 2; /* Brilho sobre a imagem */
+    transition: left 0.8s cubic-bezier(0.23, 1, 0.32, 1); /* Transição suave para o brilho */
+    opacity: 0; /* Começa invisível */
+}
+
+.logoImage:hover::after {
+    left: 150%; /* Move o brilho para fora à direita no hover */
+    opacity: 1; /* Torna visível no hover */
+}
+
+.formSection {
+    flex: 1;
+    background-color: #ffffff; /* Fundo branco do formulário */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+.loginBox {
+    width: 100%;
+    max-width: 400px; /* Ajuste conforme necessário */
+    padding: 30px;
+    border-radius: 8px; /* Bordas arredondadas, se houver */
+    /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */ /* Sombra sutil, se desejado */
+}
+
+.loginBox h1 {
+    color: #333; /* Cor do título "LOGIN" */
+    margin-bottom: 25px;
+    font-size: 24px; /* Ajuste o tamanho da fonte */
+    font-weight: bold;
+    text-align: left;
+}
+
+.formGroup {
+    margin-bottom: 20px;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 14px;
+    font-weight: 600; /* Títulos dos campos um pouco mais fortes */
+}
+
+.formGroup input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #d9d9d9; /* Borda dos inputs */
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #f7f7f7; /* Fundo levemente cinza dos inputs */
+    box-sizing: border-box; /* Para incluir padding/border na largura */
+}
+
+.formGroup input:focus {
+    outline: none;
+    border-color: #00aeff; /* Borda azul ao focar */
+    box-shadow: 0 0 0 2px rgba(0, 174, 255, 0.2);
+}
+
+.options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.rememberMe label {
+    display: flex;
+    align-items: center;
+    color: #555;
+    cursor: pointer;
+}
+
+.rememberMe input {
+    margin-right: 8px;
+}
+
+.forgotPasswordLink {
+    color: #007bff; /* Cor padrão de link */
+    text-decoration: none;
+}
+
+.forgotPasswordLink:hover {
+    text-decoration: underline;
+}
+
+.loginButton {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #00aeff; /* Azul do botão Entrar */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.loginButton:hover {
+    background-color: #008fcc; /* Azul um pouco mais escuro no hover */
+}
+
+.signupLink {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+}
+
+.signupLink a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.signupLink a:hover {
+    text-decoration: underline;
+}
+
+.socialLogin {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.socialLogin p {
+    margin-bottom: 15px;
+    color: #555;
+    font-size: 14px;
+}
+
+.socialIcons {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Espaçamento entre ícones */
+}
+
+.socialIcon {
+    /* Estilos para os ícones sociais (tamanho, cor, etc.) */
+    /* Você precisará de ícones reais aqui (SVG, Font Awesome, etc.) */
+    width: 30px;
+    height: 30px;
+    background-color: #eee; /* Placeholder */
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.errorMessage {
+    color: red;
+    margin-bottom: 15px;
+    font-size: 14px;
+    text-align: center;
+} 
+
+.loginWrapper {
+    display: flex;
+    width: 100%;
+    max-width: 960px;
+    margin: auto;
+    border-radius: 20px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .loginWrapper {
+        flex-direction: column;
+        border-radius: 0;
+        box-shadow: none;
+    }
+}
