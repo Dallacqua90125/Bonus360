@@ -3,6 +3,9 @@ import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './Login.module.css';
 import timewareLogo from '../assets/Logo-timeware.png';
+import facebookLogo from '../assets/Facebook_Logo_2023.png';
+import googleLogo from '../assets/google-logo.png';
+import appleLogo from '../assets/mac-os.png';
 
 const Login = () => {
     const [credentials, setCredentials] = useState({ email: '', password: '' });
@@ -38,6 +41,11 @@ const Login = () => {
         } catch (err) {
             setError(err.message || 'Falha no login. Por favor, verifique suas credenciais.');
         }
+    };
+
+    const handleSocialLogin = (provider) => {
+        console.log(`Login com ${provider}`);
+        // Implementação futura do login social
     };
 
     return (
@@ -104,9 +112,24 @@ const Login = () => {
                         <div className={styles.socialLogin}>
                             <p>Logar Com</p>
                             <div className={styles.socialIcons}>
-                                <div className={styles.socialIcon}>F</div>
-                                <div className={styles.socialIcon}>G</div>
-                                <div className={styles.socialIcon}>A</div>
+                                <img 
+                                    src={facebookLogo} 
+                                    alt="Facebook" 
+                                    className={styles.socialIcon} 
+                                    onClick={() => handleSocialLogin('Facebook')}
+                                />
+                                <img 
+                                    src={googleLogo} 
+                                    alt="Google" 
+                                    className={styles.socialIcon} 
+                                    onClick={() => handleSocialLogin('Google')}
+                                />
+                                <img 
+                                    src={appleLogo} 
+                                    alt="Apple" 
+                                    className={styles.socialIcon} 
+                                    onClick={() => handleSocialLogin('Apple')}
+                                />
                             </div>
                         </div>
                     </div>

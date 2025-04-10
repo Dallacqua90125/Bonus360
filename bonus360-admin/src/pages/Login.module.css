@@ -205,14 +205,23 @@
 }
 
 .socialIcon {
-    /* Estilos para os ícones sociais (tamanho, cor, etc.) */
-    /* Você precisará de ícones reais aqui (SVG, Font Awesome, etc.) */
-    width: 30px;
-    height: 30px;
-    background-color: #eee; /* Placeholder */
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
+    object-fit: contain;
+    padding: 5px;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.socialIcon:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .errorMessage {
