@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   Box,
@@ -29,10 +29,12 @@ import {
   ExpandLess,
   ExpandMore,
   Logout as LogoutIcon,
+  Settings as SettingsIcon,
+  HelpOutline as HelpOutlineIcon,
 } from '@mui/icons-material';
 
 // Importação da logo
-import timewareLogo from '../assets/Logo-timeware.png'; // Usando a mesma logo da tela de login
+import timewareLogo from '../assets/Logo-Bonus.png'; // Usando a mesma logo da tela de login
 
 // Importação das páginas
 import Dashboard from '../pages/Dashboard';
@@ -40,27 +42,19 @@ import CriarCampanha from '../pages/campanhas/CriarCampanha';
 import ListarCampanhas from '../pages/campanhas/ListarCampanhas';
 import GerarCupons from '../pages/cupons/GerarCupons';
 import GerenciarCupons from '../pages/cupons/GerenciarCupons';
-// Importações das novas páginas de Gift Card
 import CriarGiftCards from '../pages/gift-cards/CriarGiftCards';
 import ConsultarGiftCards from '../pages/gift-cards/ConsultarGiftCards';
-// Importações das novas páginas de Bundles
 import CriarBundles from '../pages/bundles/CriarBundles';
 import GerenciarBundles from '../pages/bundles/GerenciarBundles';
-// Importações das novas páginas de Fidelidade
 import ConfigurarPrograma from '../pages/fidelidade/ConfigurarPrograma';
 import VisualizarMetricas from '../pages/fidelidade/VisualizarMetricas';
-// Importações das novas páginas de Indicação
 import ConfigurarProgramasIndicacao from '../pages/indicacao/ConfigurarProgramasIndicacao';
 import MonitorarIndicacoes from '../pages/indicacao/MonitorarIndicacoes';
-// Importações das novas páginas de Carteiras
 import GerenciarCarteiras from '../pages/carteiras/GerenciarCarteiras';
 import ResgatesRecargas from '../pages/carteiras/ResgatesRecargas';
-// Importações das novas páginas de Gamificação
 import ConfigurarMecanicas from '../pages/gamificacao/ConfigurarMecanicas';
 import VisualizarLeaderboards from '../pages/gamificacao/VisualizarLeaderboards';
-// Importação da nova página de Perfil
 import Profile from '../pages/Profile';
-// ... outras importações de páginas
 
 const drawerWidth = 280;
 
@@ -137,10 +131,25 @@ const menuItems = [
 ];
 
 function Layout() {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState({});
   const { user, logout } = useAuth();
+  const [lastExpanded, setLastExpanded] = useState(null);
+
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleMouseEnter = () => {
+    setOpen(true);
+    if (lastExpanded) {
+      setExpandedItems({ [lastExpanded]: true });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setOpen(false);
+    setExpandedItems({});
+  };
 
   const handleDrawerToggle = () => {
     setOpen(!open);
@@ -148,107 +157,222 @@ function Layout() {
 
   const handleMenuItemClick = (path) => {
     navigate(path);
+    setExpandedItems({});
+    setLastExpanded(null);
   };
 
   const handleSubmenuToggle = (title) => {
-    setExpandedItems({
-      ...expandedItems,
-      [title]: !expandedItems[title],
+    const isCurrentlyExpanded = expandedItems[title];
+    const newExpandedItems = { ...expandedItems, [title]: !isCurrentlyExpanded };
+    Object.keys(menuItems).forEach((key) => {
+      if (menuItems[key].title !== title) {
+        newExpandedItems[menuItems[key].title] = false;
+      }
     });
+    setExpandedItems(newExpandedItems);
+    if (!isCurrentlyExpanded) {
+      setLastExpanded(title);
+    }
   };
 
   const handleProfileClick = () => {
-    navigate('/profile'); // Função para navegar para o perfil
+    navigate('/profile');
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ marginRight: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-            <img
-              src={timewareLogo}
-              alt="Bonus360 Logo"
-              style={{
-                height: '30px',
-                marginRight: '10px'
-              }}
-            />
-            <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-              Bonus360
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }} onClick={handleProfileClick}>
-            <Avatar sx={{ width: 32, height: 32 }}>{user?.name?.charAt(0)?.toUpperCase()}</Avatar>
-          </Box>
-          <IconButton color="inherit" onClick={logout} sx={{ ml: 1 }}>
-            <LogoutIcon />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
+    <Box sx={{ display: 'flex', width: '100%', height: '100vh', overflow: 'hidden', backgroundColor: '#f5f5f5' }}>
+
+      {/* AppBar com gap dos dois lados */}
+      <Box sx={{ width: '100%', px: '10px', position: 'fixed', top: 0, zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <AppBar position="static" sx={{
+          boxShadow: 'none',
+          borderBottom: '1px solid #D3D3D3',
+          borderRadius: '5px',
+          backgroundColor: '#FFFFFF',
+        }}>
+          <Toolbar sx={{ minHeight: '48px' }}>
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ marginRight: 2, color: '#000000' }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+              <img
+                src={timewareLogo}
+                alt="Bonus360 Logo"
+                style={{ height: '30px', marginRight: '10px' }}
+              />
+            </Box>
+            <IconButton color="inherit" onClick={logout} sx={{ ml: 1, color: '#000000' }}>
+              <LogoutIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+      </Box>
 
       <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-            ...(open ? {} : { width: theme => theme.spacing(7) }),
-          },
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflow: 'auto' }}>
-          <List>
-            {menuItems.map((item) => (
-              <React.Fragment key={item.title}>
-                <ListItem
-                  button
-                  onClick={() =>
-                    item.children
-                      ? handleSubmenuToggle(item.title)
-                      : handleMenuItemClick(item.path)
-                  }
+  variant="permanent"
+  onMouseEnter={handleMouseEnter}
+  onMouseLeave={handleMouseLeave}
+  sx={{
+    width: open ? drawerWidth : theme => theme.spacing(7),
+    flexShrink: 0,
+    '& .MuiDrawer-paper': {
+      width: open ? drawerWidth : theme => theme.spacing(7),
+      boxSizing: 'border-box',
+      backgroundColor: '#f5f5f5',
+      color: '#000000',
+      borderRight: '1px solid #e0e0e0',
+      overflowX: 'hidden',
+      transition: theme => theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+      marginTop: 0,
+      padding: 0,
+      boxShadow: 'none',
+      position: 'fixed',
+      left: 0,
+      top: 0,
+      bottom: 0,
+    },
+    '&:hover .MuiDrawer-paper': {
+      width: drawerWidth,
+    },
+  }}
+>
+  <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+    <Box sx={{ overflow: 'auto', marginTop: "60px" }}>
+      <List sx={{ marginLeft: 0 }}>
+        {menuItems.map((item) => {
+          const isActive = location.pathname === item.path;
+
+          return (
+            <React.Fragment key={item.title}>
+              <ListItem
+                button
+                onClick={() => item.path ? handleMenuItemClick(item.path) : handleSubmenuToggle(item.title)}
+                sx={{
+                  paddingY: 1,
+                  borderRadius: '8px',
+                  backgroundColor: item.title === 'Dashboard' ? '#000000' : 'inherit',
+                  color: item.title === 'Dashboard' ? '#FFFFFF' : 'inherit',
+                  '&:hover': {
+                    backgroundColor: item.title === 'Dashboard' ? '#000000' : '#D3D3D3',
+                    color: item.title === 'Dashboard' ? '#FFFFFF' : '#000000',
+                    borderRadius: '8px',
+                    width: '80%',
+                    margin: '0 auto',
+                    cursor: 'pointer',
+                  },
+                  borderLeft: 'none',
+                  width: '80%',
+                  margin: '0 auto',
+                  mb: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    color: item.title === 'Dashboard' ? '#FFFFFF' : '#000000',
+                    minWidth: '40px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                  }}
                 >
-                  <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.title} />
-                  {item.children && (
-                    expandedItems[item.title] ? <ExpandLess /> : <ExpandMore />
-                  )}
-                </ListItem>
-                {item.children && (
-                  <Collapse in={expandedItems[item.title]} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding>
-                      {item.children.map((child) => (
+                  {item.icon}
+                </ListItemIcon>
+                {open && (
+                  <ListItemText
+                    primary={item.title}
+                    primaryTypographyProps={{
+                      sx: {
+                        color: item.title === 'Dashboard' ? '#FFFFFF' : '#000000',
+                        fontSize: '1rem',
+                        padding: '0 5px',
+                      },
+                    }}
+                  />
+                )}
+                {item.children && open && (expandedItems[item.title] ? <ExpandLess /> : <ExpandMore />)}
+              </ListItem>
+
+              {item.children && (
+                <Collapse in={expandedItems[item.title]} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
+                    {item.children.map((child) => {
+                      const isChildActive = location.pathname === child.path;
+                      return (
                         <ListItem
                           button
-                          key={child.title}
-                          sx={{ pl: 4 }}
                           onClick={() => handleMenuItemClick(child.path)}
+                          key={child.title}
+                          sx={{
+                            paddingY: 1,
+                            borderRadius: '8px',
+                            backgroundColor: location.pathname === child.path ? '#808080' : 'inherit',
+                            color: location.pathname === child.path ? '#000000' : 'inherit',
+                            '&:hover': {
+                              backgroundColor: '#D3D3D3',
+                              color: '#000000',
+                              borderRadius: '8px',
+                              width: '70%',
+                              margin: '0 auto',
+                              cursor: 'pointer',
+                            },
+                            borderRadius: '8px',
+                            pl: 0,
+                            width: '70%',
+                            margin: '0 auto',
+                            mb: 1,
+                            cursor: 'pointer',
+                          }}
                         >
-                          <ListItemText primary={child.title} />
+                          <ListItemIcon sx={{ color: '#000000', minWidth: '40px' }}>
+                            {/* opcionalmente adicione ícones aqui */}
+                          </ListItemIcon>
+                          <ListItemText primary={child.title} sx={{ fontSize: '0.75rem' }} />
                         </ListItem>
-                      ))}
-                    </List>
-                  </Collapse>
-                )}
-              </React.Fragment>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
+                      );
+                    })}
+                  </List>
+                </Collapse>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </List>
+    </Box>
 
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+    {/* Footer com avatar e ajuda */}
+    <Box sx={{ padding: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', justifyContent: 'center' }} onClick={handleProfileClick}>
+        <Avatar sx={{
+          width: 32,
+          height: 32,
+          mb: 1,
+          bgcolor: '#000000',
+          color: '#FFFFFF',
+          borderRadius: '8px',
+        }}>
+          {user?.name?.charAt(0)?.toUpperCase()}
+        </Avatar>
+        {open && <Typography variant="body2" sx={{ ml: 1 }}>Usuário Teste</Typography>}
+      </Box>
+      <IconButton color="inherit">
+        <HelpOutlineIcon />
+      </IconButton>
+    </Box>
+  </Box>
+</Drawer>
+
+      <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: '#f5f5f5', overflowY: 'auto', height: 'calc(100vh - 64px)' }}>
         <Toolbar />
         <Routes>
           <Route path="/dashboard" element={<Dashboard />} />
@@ -256,32 +380,24 @@ function Layout() {
           <Route path="/campanhas/listar" element={<ListarCampanhas />} />
           <Route path="/cupons/gerar" element={<GerarCupons />} />
           <Route path="/cupons/gerenciar" element={<GerenciarCupons />} />
-          {/* Novas rotas para Gift Cards */}
           <Route path="/gift-cards/criar" element={<CriarGiftCards />} />
           <Route path="/gift-cards/consultar" element={<ConsultarGiftCards />} />
-          {/* Novas rotas para Bundles */}
           <Route path="/bundles/criar" element={<CriarBundles />} />
           <Route path="/bundles/gerenciar" element={<GerenciarBundles />} />
-          {/* Novas rotas para Fidelidade */}
           <Route path="/fidelidade/configurar" element={<ConfigurarPrograma />} />
           <Route path="/fidelidade/metricas" element={<VisualizarMetricas />} />
-          {/* Novas rotas para Indicação */}
           <Route path="/indicacao/configurar" element={<ConfigurarProgramasIndicacao />} />
           <Route path="/indicacao/monitorar" element={<MonitorarIndicacoes />} />
-          {/* Novas rotas para Carteiras */}
           <Route path="/carteiras/gerenciar" element={<GerenciarCarteiras />} />
           <Route path="/carteiras/operacoes" element={<ResgatesRecargas />} />
-          {/* Novas rotas para Gamificação */}
           <Route path="/gamificacao/configurar" element={<ConfigurarMecanicas />} />
           <Route path="/gamificacao/leaderboards" element={<VisualizarLeaderboards />} />
-          {/* Nova rota para Perfil */}
           <Route path="/profile" element={<Profile />} />
-          {/* Adicione as outras rotas aqui (se houver mais) */}
-          <Route path="*" element={<Typography>Página não encontrada</Typography>} /> {/* Rota Catch-all */}
+          <Route path="*" element={<Typography>Página não encontrada</Typography>} />
         </Routes>
       </Box>
     </Box>
   );
 }
 
-export default Layout; 
+export default Layout;

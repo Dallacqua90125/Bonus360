@@ -1,139 +1,221 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
-  Paper,
   Typography,
   TextField,
   Button,
-  FormControl,
-  Select,
   MenuItem,
-  InputBase,
-  styled
+  Select,
+  FormControl,
+  InputLabel,
+  Switch,
+  FormControlLabel,
+  styled,
+  Paper,
+  Stepper,
+  Step,
+  StepButton,
 } from '@mui/material';
 
-// Estilizando componentes para ficarem com a aparência da imagem
-const StyledPaper = styled(Paper)(({ theme }) => ({
+const Section = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
-  marginTop: theme.spacing(2),
-  boxShadow: '0px 0px 5px rgba(0, 0, 0, 0.1)',
-  borderRadius: '4px'
+  marginBottom: theme.spacing(3),
+  borderRadius: '16px',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
 }));
 
-const StyledTextField = styled(InputBase)(({ theme }) => ({
-  width: '100%',
-  border: '1px solid #ccc',
-  borderRadius: '4px',
-  padding: '8px 12px',
-  marginBottom: theme.spacing(3),
-  '&.Mui-focused': {
-    border: '1px solid #1976d2',
-  }
+const StyledInput = styled(TextField)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+  '& .MuiInputBase-root': {
+    borderRadius: 12,
+    backgroundColor: '#f9f9f9',
+  },
 }));
 
 const StyledSelect = styled(Select)(({ theme }) => ({
-  width: '100%',
-  border: '1px solid #ccc',
-  borderRadius: '4px',
-  padding: '8px 12px',
-  marginBottom: theme.spacing(3),
-  '& .MuiSelect-select': {
-    padding: 0,
-  }
+  marginBottom: theme.spacing(2),
+  borderRadius: 12,
+  backgroundColor: '#f9f9f9',
 }));
 
-const StyledButton = styled(Button)(({ theme }) => ({
-  backgroundColor: '#1976d2',
-  color: 'white',
-  padding: '12px 24px',
-  borderRadius: '4px',
-  fontSize: '14px',
-  fontWeight: 'bold',
-  textTransform: 'uppercase',
-  marginTop: theme.spacing(1),
-  '&:hover': {
-    backgroundColor: '#1565c0',
-  }
+const Container = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing(4),
+  padding: theme.spacing(3),
+  maxWidth: 'calc(100% - 280px)', // evita que ultrapasse a largura do stepper
+  marginRight: '280px', // espaço reservado para o stepper fixo
 }));
 
-function CriarCampanha() {
+const CriarCampanha = () => {
   const [campanha, setCampanha] = useState({
-    nome: '',
-    descricao: '',
-    tipo: ''
+    nome: '', descricao: '', status: '', codigoCupom: '', tipoDesconto: '',
+    dataInicio: '', dataFim: '', horaInicio: '', horaFim: '',
+    publicoAlvo: '', condicaoDesconto: '', usosPorCliente: '', usosTotais: '',
+    frequenciaUso: '', incompativel: false, aplicaEm: '', exclusoes: '',
+    freteIncluso: false, aplicaAutomatico: false,
   });
 
+  const steps = [
+    { id: 'info-gerais', label: 'Informações Gerais' },
+    { id: 'periodo', label: 'Período de Validade' },
+    { id: 'segmentacao', label: 'Segmentação e Regras' },
+    { id: 'aplicacao', label: 'Aplicação' },
+  ];
+
+  const [activeSection, setActiveSection] = useState(0);
+  const sectionRefs = useRef({});
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCampanha(prev => ({
+    const { name, value, type, checked } = e.target;
+    setCampanha((prev) => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Dados da campanha:', campanha);
-    // Aqui você adicionaria a lógica para salvar a campanha
+    console.log('Campanha:', campanha);
   };
 
-  return (
-    <Box>
-      <Typography variant="h4" component="h1" sx={{ 
-        fontWeight: 'normal', 
-        color: '#333',
-        mb: 3
-      }}>
-        Criar Campanha
-      </Typography>
-      
-      <StyledPaper>
-        <Box component="form" onSubmit={handleSubmit} noValidate>
-          <StyledTextField
-            placeholder="Nome da Campanha"
-            name="nome"
-            value={campanha.nome}
-            onChange={handleChange}
-            inputProps={{ 'aria-label': 'Nome da Campanha' }}
-          />
-          
-          <StyledTextField
-            placeholder="Descrição"
-            name="descricao"
-            value={campanha.descricao}
-            onChange={handleChange}
-            multiline
-            rows={4}
-            inputProps={{ 'aria-label': 'Descrição' }}
-          />
-          
-          <FormControl fullWidth sx={{ mb: 3 }}>
-            <StyledSelect
-              displayEmpty
-              name="tipo"
-              value={campanha.tipo}
-              onChange={handleChange}
-              input={<InputBase />}
-              renderValue={(selected) => {
-                if (!selected) {
-                  return <span style={{ color: '#757575' }}>Tipo de Campanha</span>;
-                }
-                return selected;
-              }}
-            >
-              <MenuItem value="desconto">Desconto</MenuItem>
-              <MenuItem value="cashback">Cashback</MenuItem>
-              <MenuItem value="bonus">Bônus</MenuItem>
-            </StyledSelect>
-          </FormControl>
-          
-          <StyledButton type="submit">
-            Criar Campanha
-          </StyledButton>
-        </Box>
-      </StyledPaper>
-    </Box>
-  );
-}
+  const scrollToSection = (index) => {
+    const id = steps[index].id;
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    setActiveSection(index);
+  };
 
-export default CriarCampanha; 
+  useEffect(() => {
+    const handleScroll = () => {
+      const positions = steps.map(({ id }) => {
+        const el = sectionRefs.current[id];
+        return { id, top: el.getBoundingClientRect().top };
+      });
+      const closest = positions.reduce((acc, curr, i) => {
+        return Math.abs(curr.top) < Math.abs(acc.top) ? { ...curr, index: i } : acc;
+      }, { top: Infinity, index: 0 });
+      setActiveSection(closest.index);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [steps]);
+
+  const SectionBlock = ({ id, title, children }) => (
+    <Section id={id} ref={(el) => (sectionRefs.current[id] = el)}>
+      <Typography variant="h6" gutterBottom>{title}</Typography>
+      {children}
+    </Section>
+  );
+
+  return (
+    <>
+      <Container>
+        <Typography variant="h4" gutterBottom fontWeight="bold">
+          Criar Campanha
+        </Typography>
+
+        {/* Bloco 1: Informações Gerais */}
+        <Box id="info-gerais" ref={(el) => (sectionRefs.current['info-gerais'] = el)}>
+          <Section>
+            <Typography variant="h6" gutterBottom>Informações Gerais</Typography>
+            <StyledInput label="Nome da Campanha" fullWidth name="nome" value={campanha.nome} onChange={handleChange} />
+            <StyledInput label="Descrição" fullWidth multiline rows={3} name="descricao" value={campanha.descricao} onChange={handleChange} />
+            <FormControl fullWidth>
+              <InputLabel>Status</InputLabel>
+              <StyledSelect name="status" value={campanha.status} onChange={handleChange}>
+                <MenuItem value="ativa">Ativa</MenuItem>
+                <MenuItem value="inativa">Inativa</MenuItem>
+                <MenuItem value="agendada">Agendada</MenuItem>
+              </StyledSelect>
+            </FormControl>
+            <StyledInput label="Código do Cupom" fullWidth name="codigoCupom" value={campanha.codigoCupom} onChange={handleChange} />
+            <FormControl fullWidth>
+              <InputLabel>Tipo de Desconto</InputLabel>
+              <StyledSelect name="tipoDesconto" value={campanha.tipoDesconto} onChange={handleChange}>
+                <MenuItem value="percentual">Percentual (%)</MenuItem>
+                <MenuItem value="valor">Valor fixo (R$)</MenuItem>
+                <MenuItem value="frete">Frete grátis</MenuItem>
+                <MenuItem value="produtoGratis">Produto grátis</MenuItem>
+                <MenuItem value="escalonado">Desconto escalonado</MenuItem>
+                <MenuItem value="primeiroPedido">Primeiro pedido</MenuItem>
+              </StyledSelect>
+            </FormControl>
+          </Section>
+        </Box>
+
+        {/* Blocos seguintes */}
+        <form onSubmit={handleSubmit}>
+          <SectionBlock id="periodo" title="Período de Validade">
+            <StyledInput label="Data de Início" type="date" name="dataInicio" fullWidth value={campanha.dataInicio} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+            <StyledInput label="Data de Término" type="date" name="dataFim" fullWidth value={campanha.dataFim} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+            <StyledInput label="Hora de Início" type="time" name="horaInicio" fullWidth value={campanha.horaInicio} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+            <StyledInput label="Hora de Término" type="time" name="horaFim" fullWidth value={campanha.horaFim} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+          </SectionBlock>
+
+          <SectionBlock id="segmentacao" title="Segmentação e Regras de Aplicação">
+            <FormControl fullWidth>
+              <InputLabel>Público Alvo</InputLabel>
+              <StyledSelect name="publicoAlvo" value={campanha.publicoAlvo} onChange={handleChange}>
+                <MenuItem value="todos">Todos os clientes</MenuItem>
+                <MenuItem value="cadastrados">Clientes cadastrados</MenuItem>
+                <MenuItem value="grupo">Grupo específico</MenuItem>
+                <MenuItem value="fidelidade">Clientes com histórico de pedidos</MenuItem>
+              </StyledSelect>
+            </FormControl>
+            <StyledInput label="Condições para ativar o desconto" fullWidth name="condicaoDesconto" value={campanha.condicaoDesconto} onChange={handleChange} />
+            <StyledInput label="Máximo de usos por cliente" fullWidth name="usosPorCliente" value={campanha.usosPorCliente} onChange={handleChange} />
+            <StyledInput label="Máximo de usos totais" fullWidth name="usosTotais" value={campanha.usosTotais} onChange={handleChange} />
+            <StyledInput label="Frequência de uso (ex: 1x por semana)" fullWidth name="frequenciaUso" value={campanha.frequenciaUso} onChange={handleChange} />
+            <FormControlLabel
+              control={<Switch checked={campanha.incompativel} onChange={handleChange} name="incompativel" />}
+              label="Incompatível com outras promoções"
+            />
+          </SectionBlock>
+
+          <SectionBlock id="aplicacao" title="Aplicação">
+            <StyledInput label="Aplicável a (ex: produtos, categorias)" fullWidth name="aplicaEm" value={campanha.aplicaEm} onChange={handleChange} />
+            <StyledInput label="Exclusões (ex: produtos ou métodos de pagamento)" fullWidth name="exclusoes" value={campanha.exclusoes} onChange={handleChange} />
+            <FormControlLabel
+              control={<Switch checked={campanha.freteIncluso} onChange={handleChange} name="freteIncluso" />}
+              label="Frete incluso"
+            />
+            <FormControlLabel
+              control={<Switch checked={campanha.aplicaAutomatico} onChange={handleChange} name="aplicaAutomatico" />}
+              label="Aplicar automaticamente"
+            />
+          </SectionBlock>
+
+          <Button variant="contained" color="primary" type="submit" fullWidth sx={{ padding: '12px', borderRadius: '12px', fontWeight: 'bold' }}>
+            Criar Campanha
+          </Button>
+        </form>
+      </Container>
+
+      {/* Stepper flutuante fixo no lado direito */}
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 100,
+          right: 32,
+          width: 240,
+          zIndex: 1300,
+          display: { xs: 'none', md: 'block' },
+        }}
+      >
+        <Paper elevation={3} sx={{ p: 2, borderRadius: 3 }}>
+          <Stepper nonLinear activeStep={activeSection} orientation="vertical">
+            {steps.map((step, index) => (
+              <Step key={step.id} completed={false}>
+                <StepButton onClick={() => scrollToSection(index)}>
+                  {step.label}
+                </StepButton>
+              </Step>
+            ))}
+          </Stepper>
+        </Paper>
+      </Box>
+    </>
+  );
+};
+
+export default CriarCampanha;
