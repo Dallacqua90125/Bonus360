@@ -14,15 +14,45 @@ import {
   Chip,
   IconButton,
   Tooltip,
-  List, // Para exibir produtos
-  ListItem, // Para exibir produtos
-  ListItemText // Para exibir produtos
+  Button,
+  Collapse,
+  Grid,
+  Divider,
+  styled,
+  List,
+  ListItem,
+  ListItemText
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
-import ToggleOnIcon from '@mui/icons-material/ToggleOn';
-import ToggleOffIcon from '@mui/icons-material/ToggleOff';
-import DiscountIcon from '@mui/icons-material/LocalOffer';
+import {
+  Search,
+  Edit,
+  Delete,
+  Add as AddIcon,
+  ExpandMore,
+  ExpandLess,
+  LocalOffer as DiscountIcon,
+  ShoppingBasket,
+  ContentCopy,
+  BarChart
+} from '@mui/icons-material';
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+  },
+  cursor: 'pointer',
+}));
+
+const DetailItem = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(1.5),
+  backgroundColor: '#f9f9f9',
+  borderRadius: '8px',
+  marginBottom: theme.spacing(1),
+}));
 
 // Dados Hardcoded para Bundles com desconto adicionado
 const initialBundles = [
@@ -35,6 +65,15 @@ const initialBundles = [
     status: 'ativo',
     startDate: '2024-01-01',
     endDate: null, // Sem data de fim
+    description: 'Kit completo para gamers iniciantes com os itens essenciais para uma experiência de jogo aprimorada.',
+    featured: true,
+    applicableTo: 'Categoria Gaming',
+    exclusions: 'Não aplicável com outras promoções',
+    quantityLimit: 2,
+    salesCount: 42,
+    totalRevenue: 12595.80,
+    averageOrderValue: 299.90,
+    conversionRate: '38%'
   },
   {
     id: 'BND002',
@@ -45,6 +84,15 @@ const initialBundles = [
     status: 'ativo',
     startDate: '2024-03-15',
     endDate: '2024-12-31',
+    description: 'Tudo que você precisa para montar seu escritório em casa com conforto e produtividade.',
+    featured: false,
+    applicableTo: 'Categoria Home Office',
+    exclusions: 'Não aplicável em produtos já em promoção',
+    quantityLimit: null,
+    salesCount: 28,
+    totalRevenue: 25172.00,
+    averageOrderValue: 899.00,
+    conversionRate: '62%'
   },
   {
     id: 'BND003',
@@ -55,15 +103,29 @@ const initialBundles = [
     status: 'inativo',
     startDate: '2023-11-01',
     endDate: '2024-03-01',
+    description: 'Produtos essenciais para cuidar da sua pele durante o verão e garantir uma bronzeado perfeito.',
+    featured: true,
+    applicableTo: 'Categoria Beleza e Cuidados Pessoais',
+    exclusions: 'Não aplicável em kits promocionais',
+    quantityLimit: 3,
+    salesCount: 86,
+    totalRevenue: 12857.00,
+    averageOrderValue: 149.50,
+    conversionRate: '74%'
   },
 ];
 
 function GerenciarBundles() {
   const [bundles, setBundles] = useState(initialBundles);
   const [searchTerm, setSearchTerm] = useState('');
+  const [expandedRow, setExpandedRow] = useState(null);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value.toLowerCase());
+  };
+
+  const handleRowClick = (id) => {
+    setExpandedRow(expandedRow === id ? null : id);
   };
 
   const filteredBundles = bundles.filter(bundle =>
@@ -80,15 +142,15 @@ function GerenciarBundles() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '-';
     const date = new Date(dateString + 'T00:00:00'); // Ajusta para evitar problemas de fuso
     return date.toLocaleDateString('pt-BR');
   };
 
   const getStatusChip = (status) => {
-    return status === 'ativo'
-      ? <Chip label="Ativo" color="success" size="small" />
-      : <Chip label="Inativo" color="error" size="small" />;
+    const color = status === 'ativo' ? 'success' : 'error';
+    const label = status === 'ativo' ? 'Ativo' : 'Inativo';
+    return <Chip label={label} color={color} size="small" />;
   };
 
   // Calcular preço com desconto
@@ -126,29 +188,36 @@ function GerenciarBundles() {
     return (price * discount / 100);
   };
 
-  const handleEdit = (id) => {
+  const handleEdit = (id, e) => {
+    e.stopPropagation();
     console.log("Editar Bundle:", id);
     // Lógica de edição simulada
   };
 
-  const handleToggleStatus = (id) => {
-    console.log("Alternar Status Bundle:", id);
-    setBundles(prevBundles =>
-      prevBundles.map(bundle =>
-        bundle.id === id
-          ? { ...bundle, status: bundle.status === 'ativo' ? 'inativo' : 'ativo' }
-          : bundle
-      )
-    );
+  const handleDelete = (id, e) => {
+    e.stopPropagation();
+    console.log("Excluir Bundle:", id);
+    // Lógica de exclusão simulada
   };
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Gerenciar Bundles
-      </Typography>
+    <Box sx={{ p: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" fontWeight="bold">
+          Gerenciar Bundles
+        </Typography>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          href="/bundles/criar"
+          sx={{ borderRadius: '8px' }}
+          startIcon={<AddIcon />}
+        >
+          Novo Bundle
+        </Button>
+      </Box>
 
-      <Paper sx={{ mb: 2, p: 2 }}>
+      <Box sx={{ mb: 3 }}>
         <TextField
           fullWidth
           variant="outlined"
@@ -158,29 +227,43 @@ function GerenciarBundles() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon />
+                <Search />
               </InputAdornment>
             ),
           }}
+          sx={{ 
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '8px',
+            }
+          }}
         />
-      </Paper>
+      </Box>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
         <Table sx={{ minWidth: 650 }} aria-label="tabela de bundles">
-          <TableHead>
+          <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
             <TableRow>
-              <TableCell>Nome do Bundle</TableCell>
-              <TableCell>Produtos Incluídos</TableCell>
-              <TableCell>Preço</TableCell>
-              <TableCell>Desconto</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Data Início</TableCell>
-              <TableCell>Data Fim</TableCell>
-              <TableCell align="center">Ações</TableCell>
+              <TableCell width="25%"><Typography fontWeight="bold">Nome do Bundle</Typography></TableCell>
+              <TableCell width="20%"><Typography fontWeight="bold">Produtos</Typography></TableCell>
+              <TableCell width="15%"><Typography fontWeight="bold">Preço</Typography></TableCell>
+              <TableCell width="10%"><Typography fontWeight="bold">Desconto</Typography></TableCell>
+              <TableCell width="10%"><Typography fontWeight="bold">Status</Typography></TableCell>
+              <TableCell width="10%"><Typography fontWeight="bold">Período</Typography></TableCell>
+              <TableCell width="10%" align="center"><Typography fontWeight="bold">Ações</Typography></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredBundles.length > 0 ? (
+            {filteredBundles.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    Nenhum bundle encontrado com os termos da busca.
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
               filteredBundles.map((bundle) => {
                 // Garantir que os valores são números
                 const price = typeof bundle.price === 'number' ? bundle.price : 0;
@@ -190,70 +273,192 @@ function GerenciarBundles() {
                 const discountColor = getDiscountChipColor(discount);
                 
                 return (
-                  <TableRow
-                    key={bundle.id}
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                  >
-                    <TableCell component="th" scope="row">
-                      {bundle.name}
-                    </TableCell>
-                    <TableCell>
-                      <List dense disablePadding>
-                        {bundle.products.map((product, index) => (
-                          <ListItem key={index} disableGutters sx={{ p: 0 }}>
-                            <ListItemText primary={`- ${product}`} sx={{ m: 0 }} />
-                          </ListItem>
-                        ))}
-                      </List>
-                    </TableCell>
-                    <TableCell>
-                      <Box>
-                        <Typography variant="body2" sx={{ textDecoration: 'line-through', color: 'text.secondary' }}>
-                          {formatCurrency(price)}
-                        </Typography>
-                        <Typography variant="body1" color="primary" sx={{ fontWeight: 'bold' }}>
-                          {formatCurrency(discountedPrice)}
-                        </Typography>
-                        {discount > 0 && (
-                          <Typography variant="caption" color="success.main">
-                            Economia: {formatCurrency(savings)}
+                  <React.Fragment key={bundle.id}>
+                    <StyledTableRow onClick={() => handleRowClick(bundle.id)}>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          {expandedRow === bundle.id ? 
+                            <ExpandLess color="primary" sx={{ mr: 1 }} /> : 
+                            <ExpandMore color="action" sx={{ mr: 1 }} />
+                          }
+                          <Typography variant="body2" fontWeight="medium">
+                            {bundle.name}
                           </Typography>
-                        )}
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        icon={<DiscountIcon />}
-                        label={formatDiscount(discount)} 
-                        color={discountColor} 
-                        size="small"
-                        sx={{ fontWeight: 'bold' }}
-                      />
-                    </TableCell>
-                    <TableCell>{getStatusChip(bundle.status)}</TableCell>
-                    <TableCell>{formatDate(bundle.startDate)}</TableCell>
-                    <TableCell>{formatDate(bundle.endDate)}</TableCell>
-                    <TableCell align="center">
-                      <Tooltip title="Editar">
-                        <IconButton onClick={() => handleEdit(bundle.id)} size="small">
-                          <EditIcon fontSize="small" />
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {bundle.products.length > 1 
+                            ? `${bundle.products[0]} +${bundle.products.length - 1}` 
+                            : bundle.products[0]}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Box>
+                          <Typography variant="body2" sx={{ textDecoration: 'line-through', color: 'text.secondary' }}>
+                            {formatCurrency(price)}
+                          </Typography>
+                          <Typography variant="body2" color="primary" fontWeight="medium">
+                            {formatCurrency(discountedPrice)}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Chip 
+                          icon={<DiscountIcon fontSize="small" />}
+                          label={formatDiscount(discount)} 
+                          color={discountColor} 
+                          size="small"
+                          sx={{ fontWeight: 'medium' }}
+                        />
+                      </TableCell>
+                      <TableCell>{getStatusChip(bundle.status)}</TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {formatDate(bundle.startDate)}
+                          {bundle.endDate ? ` - ${formatDate(bundle.endDate)}` : ''}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton size="small" color="primary" onClick={(e) => handleEdit(bundle.id, e)}>
+                          <Edit fontSize="small" />
                         </IconButton>
-                      </Tooltip>
-                      <Tooltip title={bundle.status === 'ativo' ? "Desativar" : "Ativar"}>
-                        <IconButton onClick={() => handleToggleStatus(bundle.id)} size="small" color={bundle.status === 'ativo' ? 'error' : 'success'}>
-                          {bundle.status === 'ativo' ? <ToggleOffIcon fontSize="small" /> : <ToggleOnIcon fontSize="small" />}
+                        <IconButton 
+                          size="small" 
+                          color="error" 
+                          onClick={(e) => handleDelete(bundle.id, e)}
+                          disabled={bundle.status === 'ativo'}
+                        >
+                          <Delete fontSize="small" />
                         </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
+                      </TableCell>
+                    </StyledTableRow>
+
+                    <TableRow>
+                      <TableCell colSpan={7} style={{ padding: 0, border: 0 }}>
+                        <Collapse in={expandedRow === bundle.id} timeout="auto" unmountOnExit>
+                          <Box sx={{ p: 3, backgroundColor: '#fafafa' }}>
+                            <Grid container spacing={3}>
+                              <Grid item xs={12} md={4}>
+                                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                                  Detalhes do Bundle
+                                </Typography>
+                                <DetailItem>
+                                  <Typography variant="caption" color="text.secondary">Descrição</Typography>
+                                  <Typography variant="body2">{bundle.description}</Typography>
+                                </DetailItem>
+                                <DetailItem>
+                                  <Typography variant="caption" color="text.secondary">Produtos Incluídos</Typography>
+                                  <List dense disablePadding>
+                                    {bundle.products.map((product, index) => (
+                                      <ListItem key={index} disableGutters sx={{ p: 0 }}>
+                                        <ListItemText primary={`- ${product}`} sx={{ m: 0 }} primaryTypographyProps={{ variant: 'body2' }} />
+                                      </ListItem>
+                                    ))}
+                                  </List>
+                                </DetailItem>
+                                {bundle.featured && (
+                                  <DetailItem>
+                                    <Typography variant="caption" color="text.secondary">Destaque</Typography>
+                                    <Typography variant="body2">
+                                      <Chip size="small" label="Em destaque" color="primary" sx={{ mt: 0.5 }} />
+                                    </Typography>
+                                  </DetailItem>
+                                )}
+                              </Grid>
+
+                              <Grid item xs={12} md={4}>
+                                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                                  Condições
+                                </Typography>
+                                <DetailItem>
+                                  <Typography variant="caption" color="text.secondary">Aplicável em</Typography>
+                                  <Typography variant="body2">{bundle.applicableTo}</Typography>
+                                </DetailItem>
+                                <DetailItem>
+                                  <Typography variant="caption" color="text.secondary">Exclusões</Typography>
+                                  <Typography variant="body2">{bundle.exclusions || '-'}</Typography>
+                                </DetailItem>
+                                <DetailItem>
+                                  <Typography variant="caption" color="text.secondary">Limite por Cliente</Typography>
+                                  <Typography variant="body2">
+                                    {bundle.quantityLimit ? `${bundle.quantityLimit} unidades` : 'Sem limite'}
+                                  </Typography>
+                                </DetailItem>
+                                <DetailItem>
+                                  <Typography variant="caption" color="text.secondary">Economia</Typography>
+                                  <Typography variant="body2" fontWeight="medium" color="success.main">
+                                    {formatCurrency(savings)} ({discount}%)
+                                  </Typography>
+                                </DetailItem>
+                              </Grid>
+
+                              <Grid item xs={12} md={4}>
+                                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                                  Estatísticas
+                                </Typography>
+                                <DetailItem>
+                                  <Typography variant="caption" color="text.secondary">Total de Vendas</Typography>
+                                  <Typography variant="body2" fontWeight="medium">{bundle.salesCount} unidades</Typography>
+                                </DetailItem>
+                                <DetailItem>
+                                  <Typography variant="caption" color="text.secondary">Receita Gerada</Typography>
+                                  <Typography variant="body2" fontWeight="medium">{formatCurrency(bundle.totalRevenue)}</Typography>
+                                </DetailItem>
+                                <DetailItem>
+                                  <Typography variant="caption" color="text.secondary">Ticket Médio</Typography>
+                                  <Typography variant="body2" fontWeight="medium">{formatCurrency(bundle.averageOrderValue)}</Typography>
+                                </DetailItem>
+                                <DetailItem>
+                                  <Typography variant="caption" color="text.secondary">Taxa de Conversão</Typography>
+                                  <Typography variant="body2" fontWeight="medium">{bundle.conversionRate}</Typography>
+                                </DetailItem>
+                              </Grid>
+
+                              <Grid item xs={12}>
+                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                                  <Button 
+                                    startIcon={<ShoppingBasket />} 
+                                    sx={{ mr: 1 }}
+                                    onClick={(e) => { 
+                                      e.stopPropagation();
+                                      console.log("Ver na loja:", bundle.id);
+                                    }}
+                                  >
+                                    Ver na Loja
+                                  </Button>
+                                  <Button 
+                                    startIcon={<BarChart />}
+                                    variant="outlined" 
+                                    color="primary"
+                                    sx={{ mr: 1 }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      console.log("Ver estatísticas:", bundle.id);
+                                    }}
+                                  >
+                                    Ver Relatório
+                                  </Button>
+                                  <Button 
+                                    variant="contained" 
+                                    color="primary"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEdit(bundle.id, e);
+                                    }}
+                                  >
+                                    Editar Bundle
+                                  </Button>
+                                </Box>
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
                 );
               })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={8} align="center">
-                  Nenhum bundle encontrado.
-                </TableCell>
-              </TableRow>
             )}
           </TableBody>
         </Table>

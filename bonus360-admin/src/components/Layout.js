@@ -139,20 +139,12 @@ function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleMouseEnter = () => {
-    setOpen(true);
-    if (lastExpanded) {
-      setExpandedItems({ [lastExpanded]: true });
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setOpen(false);
-    setExpandedItems({});
-  };
-
   const handleDrawerToggle = () => {
     setOpen(!open);
+    // Se estiver abrindo o drawer e tem um submenu expandido anteriormente
+    if (!open && lastExpanded) {
+      setExpandedItems({ [lastExpanded]: true });
+    }
   };
 
   const handleMenuItemClick = (path) => {
@@ -162,14 +154,24 @@ function Layout() {
   };
 
   const handleSubmenuToggle = (title) => {
+    // Se o drawer estiver fechado, abra-o primeiro
+    if (!open) {
+      setOpen(true);
+    }
+    
     const isCurrentlyExpanded = expandedItems[title];
     const newExpandedItems = { ...expandedItems, [title]: !isCurrentlyExpanded };
+    
+    // Fecha todos os outros submenus
     Object.keys(menuItems).forEach((key) => {
       if (menuItems[key].title !== title) {
         newExpandedItems[menuItems[key].title] = false;
       }
     });
+    
     setExpandedItems(newExpandedItems);
+    
+    // Se estiver abrindo, salva como último expandido
     if (!isCurrentlyExpanded) {
       setLastExpanded(title);
     }
@@ -214,163 +216,154 @@ function Layout() {
       </Box>
 
       <Drawer
-  variant="permanent"
-  onMouseEnter={handleMouseEnter}
-  onMouseLeave={handleMouseLeave}
-  sx={{
-    width: open ? drawerWidth : theme => theme.spacing(7),
-    flexShrink: 0,
-    '& .MuiDrawer-paper': {
-      width: open ? drawerWidth : theme => theme.spacing(7),
-      boxSizing: 'border-box',
-      backgroundColor: '#f5f5f5',
-      color: '#000000',
-      borderRight: '1px solid #e0e0e0',
-      overflowX: 'hidden',
-      transition: theme => theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      marginTop: 0,
-      padding: 0,
-      boxShadow: 'none',
-      position: 'fixed',
-      left: 0,
-      top: 0,
-      bottom: 0,
-    },
-    '&:hover .MuiDrawer-paper': {
-      width: drawerWidth,
-    },
-  }}
->
-  <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
-    <Box sx={{ overflow: 'auto', marginTop: "60px" }}>
-      <List sx={{ marginLeft: 0 }}>
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+        variant="permanent"
+        sx={{
+          width: open ? drawerWidth : theme => theme.spacing(7),
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: open ? drawerWidth : theme => theme.spacing(7),
+            boxSizing: 'border-box',
+            backgroundColor: '#f5f5f5',
+            color: '#000000',
+            borderRight: '1px solid #e0e0e0',
+            overflowX: 'hidden',
+            transition: theme => theme.transitions.create('width', {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+            marginTop: 0,
+            padding: 0,
+            boxShadow: 'none',
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            bottom: 0,
+          }
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+          <Box sx={{ overflow: 'auto', marginTop: "60px" }}>
+            <List sx={{ marginLeft: 0 }}>
+              {menuItems.map((item) => {
+                const isActive = location.pathname === item.path;
 
-          return (
-            <React.Fragment key={item.title}>
-              <ListItem
-                button
-                onClick={() => item.path ? handleMenuItemClick(item.path) : handleSubmenuToggle(item.title)}
-                sx={{
-                  paddingY: 1,
-                  borderRadius: '8px',
-                  backgroundColor: item.title === 'Dashboard' ? '#000000' : 'inherit',
-                  color: item.title === 'Dashboard' ? '#FFFFFF' : 'inherit',
-                  '&:hover': {
-                    backgroundColor: item.title === 'Dashboard' ? '#000000' : '#D3D3D3',
-                    color: item.title === 'Dashboard' ? '#FFFFFF' : '#000000',
-                    borderRadius: '8px',
-                    width: '80%',
-                    margin: '0 auto',
-                    cursor: 'pointer',
-                  },
-                  borderLeft: 'none',
-                  width: '80%',
-                  margin: '0 auto',
-                  mb: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    color: item.title === 'Dashboard' ? '#FFFFFF' : '#000000',
-                    minWidth: '40px',
-                    display: 'flex',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                {open && (
-                  <ListItemText
-                    primary={item.title}
-                    primaryTypographyProps={{
-                      sx: {
-                        color: item.title === 'Dashboard' ? '#FFFFFF' : '#000000',
-                        fontSize: '1rem',
-                        padding: '0 5px',
-                      },
-                    }}
-                  />
-                )}
-                {item.children && open && (expandedItems[item.title] ? <ExpandLess /> : <ExpandMore />)}
-              </ListItem>
-
-              {item.children && (
-                <Collapse in={expandedItems[item.title]} timeout="auto" unmountOnExit>
-                  <List component="div" disablePadding>
-                    {item.children.map((child) => {
-                      const isChildActive = location.pathname === child.path;
-                      return (
-                        <ListItem
-                          button
-                          onClick={() => handleMenuItemClick(child.path)}
-                          key={child.title}
-                          sx={{
-                            paddingY: 1,
-                            borderRadius: '8px',
-                            backgroundColor: location.pathname === child.path ? '#808080' : 'inherit',
-                            color: location.pathname === child.path ? '#000000' : 'inherit',
-                            '&:hover': {
-                              backgroundColor: '#D3D3D3',
-                              color: '#000000',
-                              borderRadius: '8px',
-                              width: '70%',
-                              margin: '0 auto',
-                              cursor: 'pointer',
+                return (
+                  <React.Fragment key={item.title}>
+                    <ListItem
+                      button
+                      onClick={() => item.path ? handleMenuItemClick(item.path) : handleSubmenuToggle(item.title)}
+                      sx={{
+                        paddingY: 1,
+                        borderRadius: '8px',
+                        backgroundColor: item.title === 'Dashboard' ? '#000000' : 'inherit',
+                        color: item.title === 'Dashboard' ? '#FFFFFF' : 'inherit',
+                        '&:hover': {
+                          backgroundColor: item.title === 'Dashboard' ? '#000000' : '#D3D3D3',
+                          color: item.title === 'Dashboard' ? '#FFFFFF' : '#000000',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                        },
+                        borderLeft: 'none',
+                        width: '80%',
+                        margin: '0 auto',
+                        mb: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <ListItemIcon
+                        sx={{
+                          color: item.title === 'Dashboard' ? '#FFFFFF' : '#000000',
+                          minWidth: '40px',
+                          display: 'flex',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {item.icon}
+                      </ListItemIcon>
+                      {open && (
+                        <ListItemText
+                          primary={item.title}
+                          primaryTypographyProps={{
+                            sx: {
+                              color: item.title === 'Dashboard' ? '#FFFFFF' : '#000000',
+                              fontSize: '1rem',
+                              padding: '0 5px',
                             },
-                            borderRadius: '8px',
-                            pl: 0,
-                            width: '70%',
-                            margin: '0 auto',
-                            mb: 1,
-                            cursor: 'pointer',
                           }}
-                        >
-                          <ListItemIcon sx={{ color: '#000000', minWidth: '40px' }}>
-                            {/* opcionalmente adicione ícones aqui */}
-                          </ListItemIcon>
-                          <ListItemText primary={child.title} sx={{ fontSize: '0.75rem' }} />
-                        </ListItem>
-                      );
-                    })}
-                  </List>
-                </Collapse>
-              )}
-            </React.Fragment>
-          );
-        })}
-      </List>
-    </Box>
+                        />
+                      )}
+                      {item.children && open && (expandedItems[item.title] ? <ExpandLess /> : <ExpandMore />)}
+                    </ListItem>
 
-    {/* Footer com avatar e ajuda */}
-    <Box sx={{ padding: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', justifyContent: 'center' }} onClick={handleProfileClick}>
-        <Avatar sx={{
-          width: 32,
-          height: 32,
-          mb: 1,
-          bgcolor: '#000000',
-          color: '#FFFFFF',
-          borderRadius: '8px',
-        }}>
-          {user?.name?.charAt(0)?.toUpperCase()}
-        </Avatar>
-        {open && <Typography variant="body2" sx={{ ml: 1 }}>Usuário Teste</Typography>}
-      </Box>
-      <IconButton color="inherit">
-        <HelpOutlineIcon />
-      </IconButton>
-    </Box>
-  </Box>
-</Drawer>
+                    {item.children && (
+                      <Collapse in={expandedItems[item.title]} timeout="auto" unmountOnExit>
+                        <List component="div" disablePadding>
+                          {item.children.map((child) => {
+                            const isChildActive = location.pathname === child.path;
+                            return (
+                              <ListItem
+                                button
+                                onClick={() => handleMenuItemClick(child.path)}
+                                key={child.title}
+                                sx={{
+                                  paddingY: 1,
+                                  borderRadius: '8px',
+                                  backgroundColor: location.pathname === child.path ? '#808080' : 'inherit',
+                                  color: location.pathname === child.path ? '#000000' : 'inherit',
+                                  '&:hover': {
+                                    backgroundColor: '#D3D3D3',
+                                    color: '#000000',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                  },
+                                  borderRadius: '8px',
+                                  pl: 0,
+                                  width: '70%',
+                                  margin: '0 auto',
+                                  mb: 1,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <ListItemIcon sx={{ color: '#000000', minWidth: '40px' }}>
+                                  {/* opcionalmente adicione ícones aqui */}
+                                </ListItemIcon>
+                                <ListItemText primary={child.title} sx={{ fontSize: '0.75rem' }} />
+                              </ListItem>
+                            );
+                          })}
+                        </List>
+                      </Collapse>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </List>
+          </Box>
+
+          {/* Footer com avatar e ajuda */}
+          <Box sx={{ padding: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', justifyContent: 'center' }} onClick={handleProfileClick}>
+              <Avatar sx={{
+                width: 32,
+                height: 32,
+                mb: 1,
+                bgcolor: '#000000',
+                color: '#FFFFFF',
+                borderRadius: '8px',
+              }}>
+                {user?.name?.charAt(0)?.toUpperCase()}
+              </Avatar>
+              {open && <Typography variant="body2" sx={{ ml: 1 }}>Usuário Teste</Typography>}
+            </Box>
+            <IconButton color="inherit">
+              <HelpOutlineIcon />
+            </IconButton>
+          </Box>
+        </Box>
+      </Drawer>
 
       <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: '#f5f5f5', overflowY: 'auto', height: 'calc(100vh - 64px)' }}>
         <Toolbar />
